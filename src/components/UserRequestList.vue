@@ -151,21 +151,28 @@ export default {
     },
     async sendModal() {
       try {
-        if(this.carType != '' || this.carNumber1 != '' || this.carNumber2 != '' || this.cellphone != '') {
-          const data = {
-            weekStartDate: this.weekStartDate,
-            carType: this.carType,
-            carNumber: `${this.carNumber1}-${this.carNumber2}`, // 組合前後車牌
-            cellPhone: this.cellphone
-          };
+        if (!this.carType) {
+          alert("請填寫車型");
+          return;
+        } else if (!this.carNumber1 || !this.carNumber2) {
+          alert("請填寫車牌號碼");
+          return;
+        } else if(!this.cellphone) {
+          alert("請填寫電話號碼");
+          return;
+        }
 
-          let response = await parkFlowService.createParkingRequest(data);
+        const data = {
+          weekStartDate: this.weekStartDate,
+          carType: this.carType,
+          carNumber: `${this.carNumber1}-${this.carNumber2}`, // 組合前後車牌
+          cellPhone: this.cellphone
+        };
 
-          if(response.code != "0000") {
-            this.$emit('error', response.message);
-          }
-        } else {
-          
+        let response = await parkFlowService.createParkingRequest(data);
+        
+        if(response.code != "0000") {
+          this.$emit('error', response.message);
         }
       } catch (error) {
         this.$emit('error', error);
@@ -200,8 +207,6 @@ export default {
 
       // 比較選擇的週是否 >= 當週
       this.isDisabled = selectedWeekStartDate > todayWeekStartDate;
-
-      console.log("是否禁用:", this.isDisabled);
     },
     getWeekStartDate(date) {
       const dayOfWeek = date.getDay();
