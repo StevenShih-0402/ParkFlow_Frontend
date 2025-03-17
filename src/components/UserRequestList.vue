@@ -129,31 +129,46 @@ export default {
       }
     },
     async applyParking() {
-      let response = await parkFlowService.queryUserInformation()
+      try {
+        let response = await parkFlowService.queryUserInformation()
 
-      if(response.code === "0000") {
-        this.chineseName = response.data.chineseName
-        this.carType = response.data.carType
-        this.cellphone = response.data.cellphone
+        if(response.code === "0000") {
+          this.chineseName = response.data.chineseName
+          this.carType = response.data.carType
+          this.cellphone = response.data.cellphone
+
+          this.carNumber1 = response.data.carNumber.split('-')[0]
+          this.carNumber2 = response.data.carNumber.split('-')[1]
         
-        this.carNumber1 = response.data.carNumber.split('-')[0]
-        this.carNumber2 = response.data.carNumber.split('-')[1]
+          this.isModalOpen = true
+        } else {
+          this.$emit('error', response.message);
+        }   
+      } catch (error) {
+        this.$emit('error', error);
+      }
 
-        this.isModalOpen = true
-      }      
     },
     async sendModal() {
-      const data = {
-        nextWeekStartDate: this.weekStartDate,
-        carType: this.carType,
-        carNumber: `${this.carNumber1}-${this.carNumber2}`, // 組合前後車牌
-        cellPhone: this.cellphone
-      };
+      try {
+        if(this.carType != '' || this.carNumber1 != '' || this.carNumber2 != '' || this.cellphone != '') {
+          const data = {
+            nextWeekStartDate: this.weekStartDate,
+            carType: this.carType,
+            carNumber: `${this.carNumber1}-${this.carNumber2}`, // 組合前後車牌
+            cellPhone: this.cellphone
+          };
 
-      let response = await parkFlowService.createParkingRequest(data);
+          let response = await parkFlowService.createParkingRequest(data);
 
-      if(response.code != "0000") {
-        alert(response.message)
+          if(response.code != "0000") {
+            this.$emit('error', response.message);
+          }
+        } else {
+          
+        }
+      } catch (error) {
+        this.$emit('error', error);
       }
 
       this.isModalOpen = false
@@ -184,7 +199,7 @@ export default {
       let todayWeekStartDate = new Date(this.getWeekStartDate(today)); // 取得當週的週一
 
       // 比較選擇的週是否 >= 當週
-      this.isDisabled = selectedWeekStartDate >= todayWeekStartDate;
+      this.isDisabled = selectedWeekStartDate > todayWeekStartDate;
 
       console.log("是否禁用:", this.isDisabled);
     },
@@ -294,7 +309,7 @@ p {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 9998;
 }
 .modal-content {
   background: white;

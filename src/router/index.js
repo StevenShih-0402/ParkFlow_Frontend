@@ -2,8 +2,18 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import ErrorModal from '../components/ErrorModal.vue'
 
 const routes = [
+  {
+    path: '/error',
+    name: 'error',
+    component: ErrorModal
+  },
+  {
+    path: '/',
+    redirect: '/login'
+  },
   {
     path: '/home',
     name: 'home',

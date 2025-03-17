@@ -26,6 +26,7 @@
         :isEditing="isEditing"
         @update:selectedRequest="selectedRequest = $event"
         @refresh-data="fetchParkingRequests"
+        @error="handleError"
       />
 
       <UserRequestList
@@ -35,8 +36,16 @@
         :isDisabled="isDisabled"
         :weekStartDate="getWeekStartDate(this.currentWeekStart)"
         @refresh-data="fetchParkingRequests"
+        @error="handleError"
       />
       
+      <ErrorModal
+        v-if="isErrorModalVisible"
+        :errorMessage="errorMessage"
+        :isVisible="isErrorModalVisible"
+        @close-error="isErrorModalVisible = false"
+      />
+
     </main>
 
   </div>
@@ -47,12 +56,14 @@ import { parkFlowService } from '../services/parkFlowService'
 import { jwtDecode } from 'jwt-decode';
 import FMRequestList from '../components/FMRequestList.vue';
 import UserRequestList from '../components/UserRequestList.vue';
+import ErrorModal from '../components/ErrorModal.vue';
 
 export default {
   name: 'HomeView',
   components: {
     FMRequestList,
-    UserRequestList
+    UserRequestList,
+    ErrorModal
   },
   data() {
     return {
@@ -60,6 +71,7 @@ export default {
       isEditing: false,
       isDisabled: false,
       modalMode: '',
+      isErrorModalVisible: false,
       errorMessage: '',
       userData: {
         userName: '',
@@ -94,17 +106,26 @@ export default {
       try {
         const token = this.getTokenFromCookie();
         const decodedToken = jwtDecode(token);
-        this.userData.userName = decodedToken.englishName;
-        this.userData.role = decodedToken.roleName;
+
+        let response = await parkFlowService.queryUserInformation()
+
+        if(response.code === "0000") {
+          this.userData.userName = response.data.englishName;
+          this.userData.role = decodedToken.roleName;
+        } else {
+          this.handleError(response.message);
+        }   
 
         await this.fetchParkingRequests();
       } catch (error) {
-        this.handleError(error, '初始化數據加載失敗');
+        this.handleError(error);
       }
     },
     async fetchParkingRequests() {
       const weekStartDate = this.getWeekStartDate(this.currentWeekStart);
-      const data = { weekStartDate };
+      const data = { 
+        weekStartDate 
+      };
 
       try {
         let response;
@@ -113,10 +134,11 @@ export default {
         } else {
           response = await parkFlowService.getUserParkingRequests(data);
         }
+        
         this.checkJwtTokenError(response.code);
         this.parkingData = response.data;
       } catch (error) {
-        this.handleError(error, '獲取停車請求失敗');
+        this.handleError(error);
       }
     },
     getWeekStartDate(date) {
@@ -153,13 +175,12 @@ export default {
         await parkFlowService.logout();
         this.$router.push('/login');
       } catch (error) {
-        this.handleError(error, '登出失敗');
+        this.handleError(error);
       }
     },
-    handleError(error, defaultMessage) {
-      console.error(defaultMessage, error);
-      const errorMessage = error.response?.data?.message || defaultMessage;
-      alert(errorMessage);
+    handleError(error) {
+      this.errorMessage = error;
+      this.isErrorModalVisible = true;
     },
   },
   mounted() {
