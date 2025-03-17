@@ -75,8 +75,6 @@ export default {
         
       const response = await parkFlowService.generallyLogin(payload);
 
-      console.log(response)
-
       if (response.code == "0001") {
         this.$router.push('/RegisterForm')
       } else if (response.code != "0000") {
@@ -85,7 +83,6 @@ export default {
         // 登入成功處理可以更完整
         document.cookie = `token=${response.data}; path=/; max-age=86400; secure; samesite=strict`;
         // 轉跳到首頁
-        console.log("登入成功");
         this.$router.push('/home');
       }
 

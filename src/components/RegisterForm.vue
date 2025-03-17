@@ -174,7 +174,6 @@ export default {
         } else {
           this.errorMessage = error.message || '註冊失敗，請稍後再試'
         }
-        console.error('註冊錯誤：', error)
       } finally {
         this.isLoading = false
       }

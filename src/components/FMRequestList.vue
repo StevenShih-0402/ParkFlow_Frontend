@@ -226,7 +226,6 @@ export default {
             this.$emit('error', response.message);
           }
  
-          this.$emit("refresh-data");
         } catch (error) {
           this.$emit('error', error);
         }
@@ -243,18 +242,16 @@ export default {
           if(response.code != "0000") {
             this.$emit('error', response.message);
           }
- 
-          this.$emit("refresh-data");
         } catch (error) {
           this.$emit('error', error);
         }
-      } else {
-        console.log("資料未變更，無需更新。");
       }
 
+      this.$emit("refresh-data");
       this.isEditing = false;
     },
     cancelTotalSlots() {
+      this.$emit("refresh-data");
       this.isEditing = false;
     },
     startEditing() {
