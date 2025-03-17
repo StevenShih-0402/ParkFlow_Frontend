@@ -9,16 +9,24 @@
         <input
           type="number"
           id="availableSlots"
-          v-model="editableRemainingQuantity"
+          v-model="totalSlots"
           min="0"
           class="input-field"
           :disabled="!isEditing"
         />
-        <button :disabled="!isDisabled" @click="isEditing = true" class="btn btn-edit">
+        <button
+          v-if="!isEditing"
+          @click="startEditing"
+          class="btn btn-edit"
+          :disabled="isPastWeek"
+        >
           <i class="fas fa-pen"></i>
         </button>
-        <button v-if="isEditing" @click="updateRemainingSlots" class="btn btn-confirm">
+        <button v-if="isEditing" @click="updateTotalSlots" class="btn btn-confirm">
           <i class="fas fa-check"></i>
+        </button>
+        <button v-if="isEditing" @click="cancelTotalSlots" class="btn btn-cancel">
+          <i class="fas fa-times"></i>
         </button>
       </div>
     </div>
@@ -34,7 +42,7 @@
           <th>手機號碼</th>
           <th>車位號碼</th>
           <th>申請狀態</th>
-          <th></th>
+          <th>操作</th>
         </tr>
       </thead>
       <tbody>
@@ -45,22 +53,22 @@
           <td>{{ request.carNumber }}</td>
           <td>{{ request.cellphone }}</td>
           <td>{{ request.parkingSlotNumber }}</td>
-          <td>
-            <i :class="getStatusIcon(request.status)" class="status-icon"></i>
-          </td>
+          <td><i :class="getStatusIcon(request.status)" class="status-icon"></i></td>
           <td>
             <button
               v-if="request.status === 'REVIEW'"
-              @click="openModel(request.status, request)"
+              @click="openModel('review', request)"
               class="btn btn-warning"
-              :disabled="!isDisabled">
+              :disabled="isPastWeek"
+            >
               審核
             </button>
             <button
               v-if="request.status === 'APPROVED'"
-              @click="openModel(request.status, request)"
+              @click="openModel('edit', request)"
               class="btn btn-info"
-              :disabled="!isDisabled">
+              :disabled="isPastWeek"
+            >
               編輯
             </button>
           </td>
@@ -93,11 +101,14 @@
         </div>
         <div class="input-group">
           <label for="parkingSlotNumber"><strong>車位號碼：</strong></label>
-          <input id="parkingSlotNumber" v-model="selectedRequest.parkingSlotNumber" class="input-field" type="number" placeholder="請輸入車位號碼"/>
+          <input id="parkingSlotNumber" v-model="selectedRequest.parkingSlotNumber" class="input-field" type="number" />
         </div>
         <div class="modal-actions">
-          <button @click="sendModal" class="btn btn-send">送出</button>
-          <button @click="closeModal" class="btn btn-close">關閉</button>
+          <div class="empty"></div>
+          <button @click="sendModel" class="btn btn-send">送出</button>
+          <div class="empty"></div>
+          <button @click="closeModel" class="btn btn-close">關閉</button>
+          <div class="empty"></div>
         </div>
       </div>
     </div>
@@ -111,44 +122,48 @@
 </template>
 
 <script>
-import { parkFlowService } from '../services/parkFlowService'
+import { parkFlowService } from '@/services/parkFlowService'
 
 export default {
+  emits: ["refresh-data"],
   props: {
     parkingData: Object,
-    weekStartDate: String
+    currentWeekStart: Date,
   },
   data() {
     return {
-      isDisabled: false,
       isEditing: false,
       isModalOpen: false,
       modalMode: '',
       selectedRequest: null,
+      originalTotalSlots: null
     };
   },
-  watch: {
-    editableRemainingQuantity(newValue) {
-      this.parkingData.totalSlots = newValue;
-    },
-    weekStartDate: {
-      immediate: true,
-      handler(newDate) {
-        this.updateDisabledState(newDate);
-      }
-    }
-  },
   computed: {
-    editableRemainingQuantity: {
+    formattedRequestTime() {
+      return this.selectedRequest?.requestTime ? new Date(this.selectedRequest.requestTime).toLocaleString("zh-TW") : "無資料";
+    },
+    totalSlots: {
       get() {
-        return this.parkingData.totalSlots || 0;
+      return this.parkingData.totalSlots || 0;
       },
       set(value) {
-        this.parkingData.totalSlots = value; // 手動同步變更
+      this.parkingData.totalSlots = value;
       }
     },
-    formattedRequestTime() {
-      return this.formatDate(this.selectedRequest.requestTime);
+    isPastWeek() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // 設定當週的「星期日」為開始日
+      const currentWeekStart = new Date(today);
+      currentWeekStart.setDate(today.getDate() - today.getDay()); // 計算本週的「星期日」
+
+      // 確保 `this.currentWeekStart` 是 Date 物件
+      const selectedWeekStart = new Date(this.getWeekStartDate(this.currentWeekStart) + "Z");
+      selectedWeekStart.setHours(0, 0, 0, 0);
+
+      return selectedWeekStart <= currentWeekStart; 
     }
   },
   methods: {
@@ -157,104 +172,96 @@ export default {
       this.modalMode = mode;
       this.selectedRequest = request;
     },
-    closeModal() {
+    async sendModel() {
+      try {
+        let payload = {
+          id: this.selectedRequest.requestId,
+          parkingSlotNumber: this.selectedRequest.parkingSlotNumber,
+          status: "APPROVED"
+        }
+
+        let response = await parkFlowService.updateParkingRequest(payload);
+
+        if(response.code != "0000") {
+          this.$emit('error', response.message)
+        }
+      } catch (error) {
+        this.$emit('error', error);
+      }
+
+      
+      this.$emit("refresh-data");
       this.isModalOpen = false;
       this.selectedRequest = null;
     },
-    async sendModal() {
-      // send data
-
-      const data = {
-        'id': this.selectedRequest.requestId,
-        'status': 'APPROVED',
-        'parkingSlotNumber': this.selectedRequest.parkingSlotNumber
-      }
-
-      let response = await parkFlowService.updateParkingRequest(data);
-      
-      if(response.code != "0000") {
-        alert(response.message)
-      }
-
-      this.$emit("refresh-data");
+    closeModel() {
       this.isModalOpen = false;
       this.selectedRequest = null;
     },
     formatDate(dateString) {
       if (!dateString) return "無資料";
-      const date = new Date(dateString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      const hours = String(date.getHours()).padStart(2, "0");
-      const minutes = String(date.getMinutes()).padStart(2, "0");
-      const seconds = String(date.getSeconds()).padStart(2, "0");
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      return new Date(dateString).toLocaleString("zh-TW");
     },
     getStatusIcon(status) {
-      switch (status) {
-        case "APPROVED":
-          return "fas fa-check-circle text-success";
-        case "REVIEW":
-          return "fas fa-hourglass-half text-warning";
-        case "REJECTED":
-          return "fas fa-times-circle text-danger";
-        default:
-          return "fas fa-question-circle text-secondary";
-      }
+      const statusIcons = {
+        "APPROVED": "fas fa-check-circle text-success",
+        "REVIEW": "fas fa-hourglass-half text-warning",
+        "REJECTED": "fas fa-times-circle text-danger"
+      };
+      return statusIcons[status] || "fas fa-question-circle text-secondary";
     },
-    // 更新
-    async updateRemainingSlots() {
-      try {
-        let response;
-        
-        if (this.parkingData.totalSlotsId === null) {
-          // 新增
-          const data = {
-            'weekStartDate': this.weekStartDate,
-            'totalSlots': this.parkingData.totalSlots
-          };
-        
-          response = await parkFlowService.createParkingQuota(data);
-        } else {
-          // 更新
-          const data = {
-            'id': this.parkingData.totalSlotsId,
-            'weekStartDate': this.weekStartDate,
-            'totalSlots': this.parkingData.totalSlots
-          };
-        
-          response = await parkFlowService.updateParkingQuota(data);
+    async updateTotalSlots() {
+      
+      if (this.parkingData.totalSlotsId === null) {
+        try {
           
-        }
-      
-        console.log("🔄 API Response:", response);
-      
-        if (response && response.code === "0000") {
-          console.log("✅ API 成功，Emitting refresh-data...");
+          let requestBody = {
+            weekStartDate: this.getWeekStartDate(this.currentWeekStart),
+            totalSlots: this.parkingData.totalSlots
+          }
+
+          let response = await parkFlowService.createParkingQuota(requestBody);
+
+          if(response.code != "0000") {
+            this.$emit('error', response.message);
+          }
+ 
           this.$emit("refresh-data");
-          this.isEditing = false;
-        } else {
-          console.error("🚨 API 失敗，未觸發 refresh-data，錯誤訊息:", response?.message);
+        } catch (error) {
+          this.$emit('error', error);
         }
-      } catch (error) {
-        console.error("🚨 發生錯誤:", error);
+
+      } else if (this.parkingData.totalSlotsId !== null && this.parkingData.totalSlots !== this.originalTotalSlots) {
+        try {
+          let requestBody = {
+            id: this.parkingData.totalSlotsId,
+            totalSlots: this.parkingData.totalSlots
+          }
+
+          let response = await parkFlowService.updatearkingQuota(requestBody);
+
+          if(response.code != "0000") {
+            this.$emit('error', response.message);
+          }
+ 
+          this.$emit("refresh-data");
+        } catch (error) {
+          this.$emit('error', error);
+        }
+      } else {
+        console.log("資料未變更，無需更新。");
       }
+
+      this.isEditing = false;
     },
-    updateDisabledState(dateString) {
-      let date = new Date(dateString)
-
-      // 取得選擇的週開始日期
-      let selectedWeekStartDate = new Date(this.getWeekStartDate(date));
-
-      // 取得今天的日期
-      let today = new Date();
-      let todayWeekStartDate = new Date(this.getWeekStartDate(today)); // 取得當週的週一
-
-      // 比較選擇的週是否 >= 當週
-      this.isDisabled = selectedWeekStartDate >= todayWeekStartDate;
-
-      console.log("是否禁用:", this.isDisabled);
+    cancelTotalSlots() {
+      this.isEditing = false;
+    },
+    startEditing() {
+      if (!this.isPastWeek) {
+        this.originalTotalSlots = this.parkingData.totalSlots;
+        this.isEditing = true;
+      }
     },
     getWeekStartDate(date) {
       const dayOfWeek = date.getDay();
@@ -274,6 +281,120 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9998;
+}
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 420px;
+  text-align: left;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0;
+}
+.input-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: #f8f9fa;
+  padding: 8px;
+  border-radius: 5px;
+}
+.input-group label {
+  flex: 1;
+  text-align: right;
+  padding-right: 10px;
+}
+.input-field {
+  flex: 2;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #ffffff;
+}
+.modal-actions {
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 15px;
+}
+.btn-close {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-send {
+  background: #28a746;
+  color: white;
+}
+
+.btn-close:hover {
+  background-color: #c82333;
+}
+
+/* 鉛筆按鈕 */
+.btn-edit {
+  background-color: #007bff;
+  color: white;
+}
+
+/* 當週以前的鉛筆按鈕變灰色 */
+.btn-edit:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* 確認按鈕 */
+.btn-confirm {
+  background-color: #28a745;
+  color: white;
+  width: 36px;
+  height: 30px;
+}
+
+.btn-cancel {
+  background-color: #fd0e35;
+  color: white;
+  width: 36px;
+  height: 30px;
+}
+
+.btn-confirm:hover {
+  background-color: #218838;
+}
+
+.btn-cancel:hover {
+  background-color: #dd3439;
+}
+
+/* 審核與編輯按鈕變灰色 */
+.btn-warning:disabled,
+.btn-info:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+</style>
 
 <style scoped>
 .request-list {
@@ -362,14 +483,7 @@ p {
 
 .input-field:disabled {
   background-color: #e9ecef;
-  cursor: not-allowed; /* 顯示禁止符號 */
-}
-
-.btn-edit:disabled {
-  background-color: #b0b0b0 !important; /* 灰色背景 */
-  color: #ffffff; /* 文字顏色 */
-  cursor: not-allowed; /* 顯示禁止符號 */
-  opacity: 0.6; /* 透明度降低 */
+  cursor: not-allowed;
 }
 
 /* 按鈕樣式 */
@@ -381,24 +495,13 @@ p {
   font-size: 16px;
 }
 
-/* 鉛筆按鈕 */
-.btn-edit {
-  background-color: #007bff;
-  color: white;
-}
-
-.btn-edit:hover {
-  background-color: #0056b3;
-}
-
-/* 確認按鈕 */
-.btn-confirm {
-  background-color: #28a745;
-  color: white;
-}
-
-.btn-confirm:hover {
-  background-color: #218838;
+/* 審核與編輯按鈕變灰色 */
+.btn-warning:disabled,
+.btn-info:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .modal-overlay {
@@ -413,60 +516,12 @@ p {
   align-items: center;
   z-index: 9999;
 }
+
 .modal-content {
   background: white;
   padding: 20px;
   border-radius: 8px;
   width: 400px;
   text-align: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
-.modal-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 10px 0;
-}
-.input-group {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 5px;
-}
-.input-group label {
-  flex: 1;
-  text-align: right;
-  padding-right: 10px;
-}
-.input-field {
-  flex: 2;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-.modal-actions {
-  display: flex;
-  justify-content: center;
-  margin-top: 15px;
-}
-.btn-close {
-  background-color: #dc3545;
-  color: white;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  border: none;
-  margin-left: 5em;
-}
-.btn-send {
-  background-color: #28a745;
-  color: white;
-}
-.btn-close:hover {
-  background-color: #c82333;
-}
-
-
 </style>

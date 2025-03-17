@@ -67,28 +67,33 @@ export const parkFlowService = {
     return response.data;
   },
 
-  //USER 申請停車位
-  async createParkingRequest(parkingRequest) {
-    const response = await apiClient.post(`/parking/create-parking-request`, parkingRequest)
-    return response.data;
-  },
-
   //FM 審核停車位
   async updateParkingRequest(parkingRequest) {
     const response = await apiClient.put(`/parking/update-parking-request`, parkingRequest)
     return response.data;
-  
   },
 
-  //新增可以停車上限
+  //新增下週可以停車上限
   async createParkingQuota(parkingQuotaRequest) {
     const response = await apiClient.post(`/parking/create-parking-quota`, parkingQuotaRequest)
     return response.data;
   },
 
-  //更新可以停車上限
-  async updateParkingQuota(parkingQuotaRequest) {
+  //申請停車位
+  async createParkingRequest(parkingRequest) {
+    const response = await apiClient.post(`/parking/create-parking-request`, parkingRequest)
+    return response.data;
+  },
+
+  //更新下週停車數量
+  async updatearkingQuota(parkingQuotaRequest) {
     const response = await apiClient.put(`/parking/update-parking-quota`, parkingQuotaRequest)
+    return response.data;
+  },
+
+  //取得使用者資訊
+  async queryUserInformation() {
+    const response = await apiClient.post(`/users/query`)
     return response.data;
   },
 
@@ -107,12 +112,6 @@ export const parkFlowService = {
   //登出
   async logout() {
     const response = await apiClient.post('/users/logout')
-    return response.data
-  },
-
-  //搜尋使用者資料
-  async queryUserInformation() {
-    const response = await apiClient.post('/users/query')
     return response.data
   }
 } 

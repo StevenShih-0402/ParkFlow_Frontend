@@ -1,7 +1,7 @@
 <template>
   <div v-if="isVisible" class="error-modal">
     <div class="error-modal-content">
-      <h2>錯誤發生</h2>
+      <h2>錯誤提示</h2>
       <p>{{ errorMessage }}</p>
       <button class="btn-close" @click="closeModal">關閉</button>
     </div>
@@ -47,6 +47,7 @@ export default {
   border-radius: 8px;
   text-align: center;
   width: 300px;
+  z-index: 9999;
 }
 
 h2 {
