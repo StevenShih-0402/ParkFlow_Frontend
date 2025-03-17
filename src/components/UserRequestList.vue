@@ -153,7 +153,7 @@ export default {
       try {
         if(this.carType != '' || this.carNumber1 != '' || this.carNumber2 != '' || this.cellphone != '') {
           const data = {
-            nextWeekStartDate: this.weekStartDate,
+            weekStartDate: this.weekStartDate,
             carType: this.carType,
             carNumber: `${this.carNumber1}-${this.carNumber2}`, // 組合前後車牌
             cellPhone: this.cellphone
