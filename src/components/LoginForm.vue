@@ -76,7 +76,7 @@ export default {
       const response = await parkFlowService.generallyLogin(payload);
 
       if (response.code == "0001") {
-        this.$router.push('/RegisterForm')
+        this.$router.push('/register')
       } else if (response.code != "0000") {
         this.errorMessage  = response.message;
       } else {

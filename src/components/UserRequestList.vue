@@ -39,7 +39,7 @@
         <h2>停車位申請</h2>
         <div class="input-group">
           <label for="carType"><strong>車型：</strong></label>
-          <input id="carType" v-model="carType" class="input-field" placeholder="請輸入英文名字" required/>
+          <input id="carType" v-model="carType" class="input-field" placeholder="請輸入車型" required/>
         </div>
         <div class="input-group">
           <label for="carNumber"><strong>車牌號碼：</strong></label>
@@ -75,7 +75,6 @@
         </div>
       </div>
     </div>
-
 </template>
 
 <script>
