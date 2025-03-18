@@ -162,7 +162,7 @@ export default {
         }
 
         const data = {
-          weekStartDate: this.weekStartDate,
+          startDate: this.weekStartDate,
           carType: this.carType,
           carNumber: `${this.carNumber1}-${this.carNumber2}`, // 組合前後車牌
           cellPhone: this.cellphone
