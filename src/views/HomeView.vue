@@ -122,9 +122,9 @@ export default {
       }
     },
     async fetchParkingRequests() {
-      const weekStartDate = this.getWeekStartDate(this.currentWeekStart);
+      const startDate = this.getWeekStartDate(this.currentWeekStart);
       const data = { 
-        weekStartDate 
+        startDate: startDate 
       };
 
       try {

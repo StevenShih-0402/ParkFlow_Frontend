@@ -216,7 +216,7 @@ export default {
         try {
           
           let requestBody = {
-            weekStartDate: this.getWeekStartDate(this.currentWeekStart),
+            startDate: this.getWeekStartDate(this.currentWeekStart),
             totalSlots: this.parkingData.totalSlots
           }
 
