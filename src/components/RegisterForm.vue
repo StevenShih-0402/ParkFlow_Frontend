@@ -104,6 +104,8 @@
           >
         </div>
 
+        <div class="form-group"><p></p></div>
+
         <div v-if="errorMessage" class="error-message">
           <i class="fas fa-exclamation-circle"></i>
           {{ errorMessage }}
@@ -318,5 +320,9 @@ button:disabled {
 .separator {
   color: #34495e;
   font-weight: bold;
+}
+
+p {
+  border-top: 2px solid #e0e0e0;
 }
 </style> 
