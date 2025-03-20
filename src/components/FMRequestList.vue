@@ -36,7 +36,7 @@
       <thead>
         <tr>
           <th>申請時間</th>
-          <th>中文姓名</th>
+          <th>姓名</th>
           <th>車型</th>
           <th>車牌號碼</th>
           <th>手機號碼</th>
@@ -48,7 +48,7 @@
       <tbody>
         <tr v-for="request in parkingData.parkingRequestList" :key="request.requestTime">
           <td>{{ formatDate(request.requestTime) }}</td>
-          <td>{{ request.chineseName }}</td>
+          <td style="word-wrap: break-word;word-break: break-all;">{{ request.name }}</td>
           <td>{{ request.carType }}</td>
           <td>{{ request.carNumber }}</td>
           <td>{{ request.cellphone }}</td>
@@ -84,8 +84,8 @@
           <input id="requestTime" :value="formattedRequestTime" class="input-field" disabled/>
         </div>
         <div class="input-group">
-          <label for="chineseName"><strong>中文姓名：</strong></label>
-          <input id="chineseName" v-model="selectedRequest.chineseName" class="input-field" disabled/>
+          <label for="name"><strong>姓名：</strong></label>
+          <input id="name" v-model="selectedRequest.name" class="input-field" disabled/>
         </div>
         <div class="input-group">
           <label for="carType"><strong>車型：</strong></label>
@@ -201,6 +201,10 @@ export default {
           status: this.localRequest.status
         }
 
+        if(this.localRequest.status === 'REJECTED') {
+          this.selectedRequest.parkingSlotNumber = null;
+        }
+
         if(this.localRequest.status === 'APPROVED' && this.selectedRequest.parkingSlotNumber === '') {
           this.$emit('error', '請填入車位號碼')
           return;
@@ -268,7 +272,7 @@ export default {
             totalSlots: this.parkingData.totalSlots
           }
 
-          let response = await parkFlowService.updatearkingQuota(requestBody);
+          let response = await parkFlowService.updateParkingQuota(requestBody);
 
           if(response.code != "0000") {
             this.$emit('error', response.message);

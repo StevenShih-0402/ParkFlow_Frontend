@@ -176,13 +176,13 @@ export default {
     async sendModal() {
       try {
         if (!this.carType) {
-          alert("請填寫車型");
+          this.$emit('error', '請填寫車型')
           return;
         } else if (!this.carNumber1 || !this.carNumber2) {
-          alert("請填寫車牌號碼");
+          this.$emit('error', '請填寫車牌號碼')
           return;
         } else if(!this.cellphone) {
-          alert("請填寫電話號碼");
+          this.$emit('error', '請填寫電話號碼')
           return;
         }
 
