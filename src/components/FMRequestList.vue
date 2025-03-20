@@ -100,6 +100,22 @@
           <input id="cellphone" v-model="selectedRequest.cellphone" class="input-field" disabled/>
         </div>
         <div class="input-group">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div>
+            <label for="status"><strong>審核結果：</strong></label>
+          </div>
+          <div>
+            <input type="radio" v-model="localRequest.status" id="approved" name="status" value="APPROVED" class="input-field" :disabled="!isStatus">
+            <label for="approved">APPROVED</label>
+          </div>
+          <div>
+            <input type="radio" v-model="localRequest.status" id="rejected" name="status" value="REJECTED" class="input-field" :disabled="!isStatus">
+            <label for="rejected">REJECTED</label>
+          </div>
+        </div>
+        <div class="input-group">
           <label for="parkingSlotNumber"><strong>車位號碼：</strong></label>
           <input id="parkingSlotNumber" v-model="selectedRequest.parkingSlotNumber" class="input-field" type="number" />
         </div>
@@ -134,9 +150,11 @@ export default {
     return {
       isEditing: false,
       isModalOpen: false,
+      isStatus: false,
       modalMode: '',
       selectedRequest: null,
-      originalTotalSlots: null
+      originalTotalSlots: null,
+      localRequest: null
     };
   },
   computed: {
@@ -168,23 +186,35 @@ export default {
   },
   methods: {
     openModel(mode, request) {
+      this.isStatus = (mode === 'review');
+      console.log(this.isStatus)
       this.isModalOpen = true;
       this.modalMode = mode;
       this.selectedRequest = request;
+      this.localRequest = { ...request };
     },
     async sendModel() {
       try {
         let payload = {
           id: this.selectedRequest.requestId,
           parkingSlotNumber: this.selectedRequest.parkingSlotNumber,
-          status: "APPROVED"
+          status: this.localRequest.status
+        }
+
+        if(this.localRequest.status === 'APPROVED' && this.selectedRequest.parkingSlotNumber === '') {
+          this.$emit('error', '請填入車位號碼')
+          return;
         }
 
         let response = await parkFlowService.updateParkingRequest(payload);
 
         if(response.code != "0000") {
           this.$emit('error', response.message)
+          return;
         }
+
+        Object.assign(this.selectedRequest, this.localRequest);
+
       } catch (error) {
         this.$emit('error', error);
       }
@@ -197,6 +227,7 @@ export default {
     closeModel() {
       this.isModalOpen = false;
       this.selectedRequest = null;
+      this.$emit("refresh-data");
     },
     formatDate(dateString) {
       if (!dateString) return "無資料";
@@ -315,6 +346,7 @@ export default {
   padding: 8px;
   border-radius: 5px;
 }
+
 .input-group label {
   flex: 1;
   text-align: right;
@@ -326,6 +358,7 @@ export default {
   border: 1px solid #ddd;
   border-radius: 4px;
   background: #ffffff;
+  text-align: center;
 }
 .modal-actions {
   display: flex;
@@ -391,9 +424,7 @@ export default {
   cursor: not-allowed;
   pointer-events: none;
 }
-</style>
 
-<style scoped>
 .request-list {
   background-color: white;
   padding: 1.5rem;
@@ -466,16 +497,6 @@ p {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.input-field {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  width: 80px;
-  text-align: center;
-  background-color: #f8f9fa;
-  transition: background-color 0.3s;
 }
 
 .input-field:disabled {

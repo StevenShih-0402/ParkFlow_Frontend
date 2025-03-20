@@ -39,6 +39,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 9999;
 }
 
 .error-modal-content {
@@ -47,7 +48,6 @@ export default {
   border-radius: 8px;
   text-align: center;
   width: 300px;
-  z-index: 9999;
 }
 
 h2 {
