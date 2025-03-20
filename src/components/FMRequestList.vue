@@ -12,6 +12,7 @@
           v-model="totalSlots"
           min="0"
           class="input-field"
+          :class="{ 'notFound-field': parkingData.totalSlotsId === null }"
           :disabled="!isEditing"
         />
         <button
@@ -541,5 +542,11 @@ p {
   border-radius: 8px;
   width: 400px;
   text-align: center;
+}
+
+/* 未設定停車數量上限 */
+.notFound-field {
+  border: 2px solid red;
+  background-color: rgb(255, 200, 200) !important;
 }
 </style>
