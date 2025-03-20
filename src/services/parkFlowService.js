@@ -86,7 +86,7 @@ export const parkFlowService = {
   },
 
   //更新下週停車數量
-  async updatearkingQuota(parkingQuotaRequest) {
+  async updateParkingQuota(parkingQuotaRequest) {
     const response = await apiClient.put(`/parking/update-parking-quota`, parkingQuotaRequest)
     return response.data;
   },
