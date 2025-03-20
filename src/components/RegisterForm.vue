@@ -164,7 +164,7 @@ export default {
         
         if (response.code != "0000") {
           this.errorMessage = response.message;
-        } else if(response.status == "0000") {
+        } else if(response.code == "0000") {
           // 註冊成功，導向登入頁
           document.cookie = `token=${response.data}; path=/; max-age=86400; secure; samesite=strict`;
           this.$router.push('/home');

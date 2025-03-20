@@ -32,6 +32,11 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- 剩餘車位資訊 -->
+    <div class="parking-summary">
+      <p>剩餘車位: {{ parkingData.remainingQuantity }}</p>
+    </div>
   </div>
 
   <div v-if="isModalOpen" class="modal-overlay">
