@@ -106,6 +106,26 @@ export default {
         handler(newDate) {
           this.updateDisabledState(newDate);
         }
+      },
+      parkingData: {
+        deep: true,         // 監聽物件內部的變化
+        handler(data) {
+
+          // const today = new Date();
+          // // // 檢查時間是否在今天以前
+          // const isBeforeToday = startDate < today;
+
+          // // 過濾掉 "REJECTED" 的資料
+          const approveAndReviewRequests = data.parkingRequestList.filter(
+            (item) => item.status !== "REJECTED"
+          );
+
+          if (approveAndReviewRequests.length > 0 || data.remainingQuantity == 0) {
+            this.isDisabled = false;  // 按鈕不顯示：parkingRequestList 有除了 REJECTED 的資料、時間在今天以前、沒有剩餘車位、
+          } else {
+            this.isDisabled = true;  // 按鈕要顯示
+          }
+        }
       }
   },
   methods: {
