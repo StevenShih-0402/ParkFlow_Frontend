@@ -10,7 +10,7 @@
       <thead>
         <tr>
           <th>申請時間</th>
-          <th>中文姓名</th>
+          <th>姓名</th>
           <th>車型</th>
           <th>車牌號碼</th>
           <th>手機號碼</th>
@@ -21,7 +21,7 @@
       <tbody>
         <tr v-for="request in parkingData.parkingRequestList" :key="request.requestTime">
           <td>{{ formatDate(request.requestTime) }}</td>
-          <td>{{ request.chineseName }}</td>
+          <td class="tableWrap">{{ request.name }}</td>
           <td>{{ request.carType }}</td>
           <td>{{ request.carNumber }}</td>
           <td>{{ request.cellphone }}</td>
@@ -111,18 +111,23 @@ export default {
         deep: true,         // 監聽物件內部的變化
         handler(data) {
 
-          const today = new Date();
-          // 檢查時間是否在今天以前
-          const isBeforeToday = weekStartDate < today;
-
           // 過濾掉 "REJECTED" 的資料
           const approveAndReviewRequests = data.parkingRequestList.filter(
             (item) => item.status !== "REJECTED"
           );
 
-          if (isBeforeToday || approveAndReviewRequests.length > 0 || data.remainingQuantity == 0) {
-            this.isDisabled = false;  // 按鈕不顯示：parkingRequestList 有除了 REJECTED 的資料、時間在今天以前、沒有剩餘車位、
-          } else {
+          const startDate = new Date(this.weekStartDate);
+          const today = new Date();
+          if (approveAndReviewRequests.length > 0) {  // parkingRequestList 有 APPROVAL 和 REVIEW 的資料
+            this.isDisabled = false;  // 按鈕不顯示
+          } 
+          else if(data.remainingQuantity == 0){  // 沒有剩餘車位
+            this.isDisabled = false;
+          }
+          else if(startDate < today){
+            this.isDisabled = false;
+          }
+          else {
             this.isDisabled = true;  // 按鈕要顯示
           }
         }
@@ -425,6 +430,11 @@ p {
   color: #ffffff; /* 文字顏色 */
   cursor: not-allowed; /* 顯示禁止符號 */
   opacity: 0.6; /* 透明度降低 */
+}
+
+.tableWrap{
+  word-wrap: break-word;
+  word-break: break-all;
 }
 
 </style> 
