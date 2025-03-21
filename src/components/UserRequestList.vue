@@ -10,7 +10,7 @@
       <thead>
         <tr>
           <th>申請時間</th>
-          <th>中文姓名</th>
+          <th>姓名</th>
           <th>車型</th>
           <th>車牌號碼</th>
           <th>手機號碼</th>
@@ -21,7 +21,7 @@
       <tbody>
         <tr v-for="request in parkingData.parkingRequestList" :key="request.requestTime">
           <td>{{ formatDate(request.requestTime) }}</td>
-          <td>{{ request.chineseName }}</td>
+          <td class="tableWrap">{{ request.name }}</td>
           <td>{{ request.carType }}</td>
           <td>{{ request.carNumber }}</td>
           <td>{{ request.cellphone }}</td>
@@ -118,7 +118,6 @@ export default {
 
           const startDate = new Date(this.weekStartDate);
           const today = new Date();
-
           if (approveAndReviewRequests.length > 0) {  // parkingRequestList 有 APPROVAL 和 REVIEW 的資料
             this.isDisabled = false;  // 按鈕不顯示
           } 
@@ -431,6 +430,11 @@ p {
   color: #ffffff; /* 文字顏色 */
   cursor: not-allowed; /* 顯示禁止符號 */
   opacity: 0.6; /* 透明度降低 */
+}
+
+.tableWrap{
+  word-wrap: break-word;
+  word-break: break-all;
 }
 
 </style> 
