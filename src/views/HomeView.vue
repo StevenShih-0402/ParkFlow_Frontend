@@ -3,7 +3,7 @@
     <header class="header">
       <h1>停車場預約系統</h1>
       <div class="user-controls">
-        <span class="user-name">{{ userData.userName }}</span>
+        <button class="user-profile-btn" @click="showUserData">{{ userData.userName }}</button>
         <button class="logout-btn" @click="handleLogout">登出</button>
       </div>
     </header>
@@ -46,6 +46,13 @@
         @close-error="isErrorModalVisible = false"
       />
 
+      <UserProfileForm 
+        v-if="isUserProfileFormVisible"
+        :isVisible="isUserProfileFormVisible"
+        :userDataModel="userDataModel"
+        @close="isUserProfileFormVisible = false"
+      />
+
     </main>
 
   </div>
@@ -57,13 +64,15 @@ import { jwtDecode } from 'jwt-decode';
 import FMRequestList from '../components/FMRequestList.vue';
 import UserRequestList from '../components/UserRequestList.vue';
 import ErrorModal from '../components/ErrorModal.vue';
+import UserProfileForm from '../components/UserProfileForm.vue';
 
 export default {
   name: 'HomeView',
   components: {
     FMRequestList,
     UserRequestList,
-    ErrorModal
+    ErrorModal,
+    UserProfileForm
   },
   data() {
     return {
@@ -72,6 +81,7 @@ export default {
       isDisabled: false,
       modalMode: '',
       isErrorModalVisible: false,
+      isUserProfileFormVisible: false,
       errorMessage: '',
       userData: {
         userName: '',
@@ -83,6 +93,7 @@ export default {
         totalSlots: 0,
         remainingQuantity: 0,
       },
+      userDataModel: null,
       currentWeekStart: new Date(),
     }
   },
@@ -182,6 +193,13 @@ export default {
       this.errorMessage = error;
       this.isErrorModalVisible = true;
     },
+    async showUserData(){
+      let response = await parkFlowService.queryUserInformation();
+      if(response.code === "0000") {
+        this.isUserProfileFormVisible = true;
+        this.userDataModel = response.data;
+      }
+    }
   },
   mounted() {
     this.loadInitialData();
@@ -218,6 +236,14 @@ export default {
   color: white;
   border: none;
   border-radius: 4px;
+  cursor: pointer;
+}
+
+.user-profile-btn{
+  padding: 0.5rem 1rem;
+  background-color: #2c3e50;
+  color: white;
+  border: none;
   cursor: pointer;
 }
 
