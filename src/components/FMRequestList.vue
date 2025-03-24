@@ -9,7 +9,7 @@
         <input
           type="number"
           id="availableSlots"
-          v-model="totalSlots"
+          v-model="localTotalSlots"
           min="0"
           class="input-field"
           :class="{ 'notFound-field': parkingData.totalSlotsId === null }"
@@ -155,8 +155,19 @@ export default {
       modalMode: '',
       selectedRequest: null,
       originalTotalSlots: null,
-      localRequest: null
+      localRequest: null,
+      localTotalSlots: null
     };
+  },
+  watch: {
+    parkingData: {
+      immediate: true,
+      handler(newVal) {
+        if(!this.isEditing) {
+          this.localTotalSlots = newVal.totalSlots
+        }
+      }
+    }
   },
   computed: {
     formattedRequestTime() {
@@ -164,10 +175,10 @@ export default {
     },
     totalSlots: {
       get() {
-      return this.parkingData.totalSlots || 0;
+        return this.parkingData.totalSlots || 0;
       },
       set(value) {
-      this.parkingData.totalSlots = value;
+        this.localTotalSlots = value; // 只更新 local
       }
     },
     isPastWeek() {
@@ -188,7 +199,6 @@ export default {
   methods: {
     openModel(mode, request) {
       this.isStatus = (mode === 'review');
-      console.log(this.isStatus)
       this.isModalOpen = true;
       this.modalMode = mode;
       this.selectedRequest = request;
@@ -247,7 +257,8 @@ export default {
       return statusIcons[status] || "fas fa-question-circle text-secondary";
     },
     async updateTotalSlots() {
-      
+      console.log(this.parkingData.totalSlots)
+      console.log(this.localTotalSlots)
       if (this.parkingData.totalSlotsId === null) {
         try {
           
@@ -261,16 +272,18 @@ export default {
           if(response.code != "0000") {
             this.$emit('error', response.message);
           }
+
+          this.parkingData.totalSlots = this.localTotalSlots;
  
         } catch (error) {
           this.$emit('error', error);
         }
 
-      } else if (this.parkingData.totalSlotsId !== null && this.parkingData.totalSlots !== this.originalTotalSlots) {
+      } else if (this.parkingData.totalSlotsId !== null && this.parkingData.totalSlots !== this.localTotalSlots) {
         try {
           let requestBody = {
             id: this.parkingData.totalSlotsId,
-            totalSlots: this.parkingData.totalSlots
+            totalSlots: this.localTotalSlots
           }
 
           let response = await parkFlowService.updateParkingQuota(requestBody);
@@ -278,6 +291,9 @@ export default {
           if(response.code != "0000") {
             this.$emit('error', response.message);
           }
+
+          this.parkingData.totalSlots = this.localTotalSlots;
+
         } catch (error) {
           this.$emit('error', error);
         }
@@ -293,6 +309,7 @@ export default {
     startEditing() {
       if (!this.isPastWeek) {
         this.originalTotalSlots = this.parkingData.totalSlots;
+        this.localTotalSlots = this.parkingData.totalSlots;
         this.isEditing = true;
       }
     },
