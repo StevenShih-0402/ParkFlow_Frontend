@@ -257,10 +257,9 @@ export default {
       return statusIcons[status] || "fas fa-question-circle text-secondary";
     },
     async updateTotalSlots() {
-      console.log(this.parkingData.totalSlots)
-      console.log(this.localTotalSlots)
-      if (this.parkingData.totalSlotsId === null) {
-        try {
+      try {
+        
+        if (this.parkingData.totalSlotsId === null) {
           
           let requestBody = {
             startDate: this.getWeekStartDate(this.currentWeekStart),
@@ -274,13 +273,9 @@ export default {
           }
 
           this.parkingData.totalSlots = this.localTotalSlots;
- 
-        } catch (error) {
-          this.$emit('error', error);
-        }
 
-      } else if (this.parkingData.totalSlotsId !== null && this.parkingData.totalSlots !== this.localTotalSlots) {
-        try {
+        } else if (this.parkingData.totalSlotsId !== null && this.parkingData.totalSlots !== this.localTotalSlots) {
+          
           let requestBody = {
             id: this.parkingData.totalSlotsId,
             totalSlots: this.localTotalSlots
@@ -294,13 +289,13 @@ export default {
 
           this.parkingData.totalSlots = this.localTotalSlots;
 
-        } catch (error) {
-          this.$emit('error', error);
         }
-      }
 
-      this.$emit("refresh-data");
-      this.isEditing = false;
+        this.$emit("refresh-data");
+        this.isEditing = false;
+      } catch (error) {
+          this.$emit('error', error);
+      }
     },
     cancelTotalSlots() {
       this.$emit("refresh-data");
