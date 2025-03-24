@@ -111,18 +111,24 @@ export default {
         deep: true,         // 監聽物件內部的變化
         handler(data) {
 
-          const today = new Date();
-          // 檢查時間是否在今天以前
-          const isBeforeToday = weekStartDate < today;
-
           // 過濾掉 "REJECTED" 的資料
           const approveAndReviewRequests = data.parkingRequestList.filter(
             (item) => item.status !== "REJECTED"
           );
 
-          if (isBeforeToday || approveAndReviewRequests.length > 0 || data.remainingQuantity == 0) {
-            this.isDisabled = false;  // 按鈕不顯示：parkingRequestList 有除了 REJECTED 的資料、時間在今天以前、沒有剩餘車位、
-          } else {
+          const startDate = new Date(this.weekStartDate);
+          const today = new Date();
+
+          if (approveAndReviewRequests.length > 0) {  // parkingRequestList 有 APPROVAL 和 REVIEW 的資料
+            this.isDisabled = false;  // 按鈕不顯示
+          } 
+          else if(data.remainingQuantity == 0){  // 沒有剩餘車位
+            this.isDisabled = false;
+          }
+          else if(startDate < today){
+            this.isDisabled = false;
+          }
+          else {
             this.isDisabled = true;  // 按鈕要顯示
           }
         }
