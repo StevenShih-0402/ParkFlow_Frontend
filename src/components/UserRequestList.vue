@@ -118,6 +118,7 @@ export default {
 
           const startDate = new Date(this.weekStartDate);
           const today = new Date();
+
           if (approveAndReviewRequests.length > 0) {  // parkingRequestList 有 APPROVAL 和 REVIEW 的資料
             this.isDisabled = false;  // 按鈕不顯示
           } 
@@ -436,5 +437,4 @@ p {
   word-wrap: break-word;
   word-break: break-all;
 }
-
 </style> 
