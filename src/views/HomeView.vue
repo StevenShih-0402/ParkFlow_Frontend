@@ -6,7 +6,7 @@
                 <div class="dropdown">
                     <button class="dropdown-btn" @click="toggleDropdown"><i class="fa fa-bars fa-2x"></i></button>
                     <div class="dropdown-menu" v-show="isDropdownOpen">
-                        <button @click="showUserData">個人資料</button>
+                        <button @click="goToUserView">個人資料</button>
                         <button @click="handleLogout">登出</button>
                     </div>
                 </div>
@@ -51,13 +51,6 @@
                 @close-error="isErrorModalVisible = false"
             />
 
-            <!-- <UserProfileForm 
-                v-if="isUserProfileFormVisible"
-                :isVisible="isUserProfileFormVisible"
-                :userDataModel="userDataModel"
-                @close="isUserProfileFormVisible = false"
-            /> -->
-
         </main>
     </div>
 </template>
@@ -68,15 +61,13 @@ import { jwtDecode } from 'jwt-decode';
 import FMRequestList from '../components/FMRequestList.vue';
 import UserRequestList from '../components/UserRequestList.vue';
 import ErrorModal from '../components/ErrorModal.vue';
-import UserProfileForm from '../components/UserProfileForm.vue';
 
 export default {
     name: 'HomeView',
     components: {
         FMRequestList,
         UserRequestList,
-        ErrorModal,
-        UserProfileForm
+        ErrorModal
     },
     data() {
         return {
@@ -203,13 +194,8 @@ export default {
         toggleDropdown() {
             this.isDropdownOpen = !this.isDropdownOpen;
         },
-        async showUserData(){
-            let response = await parkFlowService.queryUserInformation();
-            if(response.code === "0000") {
-                // this.isUserProfileFormVisible = true;
-                this.$router.push('/user')
-                this.userDataModel = response.data;
-            }
+        async goToUserView(){
+            this.$router.push('/user')
             this.isDropdownOpen = false;
         }
     },

@@ -13,6 +13,11 @@
             </div>
         </header>
 
+        <div v-show="showUpdateSuccess" :class="{ 'fade-out': isFading }"  class="message-box">
+            <i class="fa fa-info-circle"></i>
+            <p>資料修改成功！</p>
+        </div>
+
         <main class="main-content">
             <div class="model-content">
                 <h2>用戶個人資訊</h2>
@@ -68,31 +73,55 @@
                     </div>
                 </div>
                 <div class="model-actions">
-                    <button @click="fixModel" class="btn btn-fix">儲存內容</button>
-                    <button @click="backToHome" class="btn btn-back">返回首頁</button>
+                    <button 
+                        @click="updateUserData" 
+                        class="btn btn-fix" 
+                        :disabled="!dataUpdated" 
+                        :class="{ 'btn-disabled': !dataUpdated, 'btn-active': dataUpdated }">更新內容</button>
+                    <button 
+                        @click="backToHome" 
+                        class="btn btn-back">返回首頁</button>
                 </div>
 
             </div>
         </main>
     </div>
+
+    <ErrorModal
+        v-if="isErrorModalVisible"
+        :errorMessage="errorMessage"
+        :isVisible="isErrorModalVisible"
+        @close-error="isErrorModalVisible = false"
+    />
 </template>
 
 <script>
+import ErrorModal from '../components/ErrorModal.vue';
 import { parkFlowService } from '../services/parkFlowService'
 
 export default {
     name: 'UserView',
     components: {
-
+        ErrorModal
     },
     mounted() {
-        this.showUserData();
+        this.initialUserData();
     },
     data() {
         return {
             isDropdownOpen: false,
             isErrorModalVisible: false,
+            showUpdateSuccess: false,
             errorMessage: '',
+            originalUser:{
+                chineseName: '',
+                englishName: '',
+                email: '',
+                cellphone: '',
+                carNumber1: '',
+                carNumber2: '',
+                carType: ''
+            },
             userDataModel: {
                 chineseName: '',
                 englishName: '',
@@ -101,10 +130,35 @@ export default {
                 carNumber1: '',
                 carNumber2: '',
                 carType: ''
+            },
+            isFading: false,  // 是否觸發淡出效果
+            dataUpdated: false
+        }
+    },
+    watch: {
+        userDataModel: {
+            deep: true,  // 監聽物件內部的變化
+            handler() {
+                // 檢查是否有欄位被修改
+                this.dataUpdated = JSON.stringify(this.originalUser) !== JSON.stringify(this.userDataModel);
             }
         }
     },
     methods: {
+        async initialUserData(){
+            let response = await parkFlowService.queryUserInformation();
+            if(response.code === "0000") {
+                this.originalUser.chineseName = response.data.chineseName;
+                this.originalUser.englishName = response.data.englishName;
+                this.originalUser.email = response.data.email;
+                this.originalUser.cellphone = response.data.cellphone;
+                this.originalUser.carNumber1 = response.data.carNumber.split('-')[0],
+                this.originalUser.carNumber2 = response.data.carNumber.split('-')[1],
+                this.originalUser.carType = response.data.carType;
+
+                this.showUserData();
+            }
+        },
         async handleLogout() {
             try {
                 await parkFlowService.logout();
@@ -122,18 +176,45 @@ export default {
             this.isDropdownOpen = !this.isDropdownOpen;
         },
         async showUserData(){
-            let response = await parkFlowService.queryUserInformation();
-            if(response.code === "0000") {
-                // this.isUserProfileFormVisible = true;
-                this.$router.push('/user')
-                this.userDataModel.chineseName = response.data.chineseName;
-                this.userDataModel.englishName = response.data.englishName;
-                this.userDataModel.email = response.data.email;
-                this.userDataModel.cellphone = response.data.cellphone;
-                this.userDataModel.carNumber1 = response.data.carNumber.split('-')[0],
-                this.userDataModel.carNumber2 = response.data.carNumber.split('-')[1],
-                this.userDataModel.carType = response.data.carType;
+            this.userDataModel.chineseName = this.originalUser.chineseName;
+            this.userDataModel.englishName = this.originalUser.englishName;
+            this.userDataModel.email = this.originalUser.email;
+            this.userDataModel.cellphone = this.originalUser.cellphone;
+            this.userDataModel.carNumber1 = this.originalUser.carNumber1,
+            this.userDataModel.carNumber2 = this.originalUser.carNumber2,
+            this.userDataModel.carType = this.originalUser.carType;
+        },
+        async updateUserData(){
+            const userData = { 
+                chineseName: this.userDataModel.chineseName,
+                englishName: this.userDataModel.englishName,
+                cellphone: this.userDataModel.cellphone,
+                carNumber: this.userDataModel.carNumber1 + "-" + this.userDataModel.carNumber2,
+                carType: this.userDataModel.carType
             }
+            let response = await parkFlowService.updateUserInformation(userData);
+            
+            if(response.code === "0000"){
+                this.initialUserData();
+                this.showUserData();
+                this.showUpdateSuccessMessage();
+            }
+            else{
+                this.errorMessage = response.message;
+                this.isErrorModalVisible = true;
+            }
+        },
+        showUpdateSuccessMessage() {
+            this.showUpdateSuccess = true; // 顯示訊息
+            this.isFading = false;  // 確保動畫重置
+
+            setTimeout(() => {
+                this.isFading = true; // 開始淡出
+            }, 2000); // 2 秒後開始淡出
+
+            setTimeout(() => {
+                this.showUpdateSuccess = false; // 3秒後隱藏
+            }, 3000);
         },
         backToHome(){
             this.$router.push("/home");
@@ -267,41 +348,40 @@ export default {
         flex: 3;
         font-size: 18px;
         padding: 8px;
-        border: 1px solid white;
+        border: 1px solid lightgray;
+        background-color: #e8f0fe;
         border-radius: 4px;
         min-width: 50%;
     }
-    .input-field:hover {
-        border: 1px solid lightgray;
+    .input-field#email{
+        border: 1px solid white;
+        background-color: #ffffff;
+        pointer-events: none;
     }
 
     .car-number-left{
         font-size: 18px;
-        border: 1px solid white;
+        border: 1px solid lightgray;
+        background-color: #e8f0fe;
         padding: 8px;
         margin-right: 8px;
         width: 3em; 
         border-radius: 4px;
         text-align: left;
     }
-    .car-number-left:hover {
-        border: 1px solid lightgray;
-    }
     .car-number-right{
         font-size: 18px;
-        border: 1px solid white;
+        border: 1px solid lightgray;
+        background-color: #e8f0fe;
         padding: 8px;
         width: 3em; 
         border-radius: 4px;
         margin-left: 10px;
         text-align: left;
     }
-    .car-number-right:hover {
-        border: 1px solid lightgray;
-    }
     .car-number-inputs {
         flex: 3;
-        padding: 8px;
+        padding: 8px 0;
     }
 
     .model-actions {
@@ -333,7 +413,48 @@ export default {
     .btn-back:hover {
         background-color: #c82333;
     }
-    .btn-fix:hover {
+
+    /* 更新資料的按鈕控制 */
+    .btn-disabled {
+        background: gray;
+        color: white;
+        cursor: not-allowed;
+    }
+    .btn-active {
+        background: green;
+        color: white;
+    }
+    .btn-active:hover {
         background-color: #218838;
+    }
+
+    .message-box {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        display: flex;
+        align-items: center;
+        transform: translateX(-50%);
+        padding: 5px 20px;
+        background-color: rgba(0, 255, 0, 0.5); /* 半透明綠色 */
+        color: white;
+        border-radius: 5px;
+        border: 2px solid green;
+        font-size: 16px;
+        opacity: 1;
+        transition: opacity 1s ease-out; /* 1秒內淡出 */
+    }
+
+    .message-box.v-leave-active {
+        opacity: 0;
+    }
+
+    /* 淡出動畫 */
+    .fade-out {
+        opacity: 0;
+    }
+
+    .message-box i{
+        padding-right: 10px;
     }
 </style> 

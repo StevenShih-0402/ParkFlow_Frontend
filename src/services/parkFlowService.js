@@ -91,6 +91,12 @@ export const parkFlowService = {
     return response.data;
   },
 
+  //修改使用者資訊
+  async updateUserInformation(userData) {
+    const response = await apiClient.put(`/users/update`, userData)
+    return response.data;
+  },
+
   //取得使用者資訊
   async queryUserInformation() {
     const response = await apiClient.post(`/users/query`)
