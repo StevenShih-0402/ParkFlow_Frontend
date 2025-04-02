@@ -118,7 +118,7 @@
         </div>
         <div class="input-group">
           <label for="parkingSlotNumber"><strong>車位號碼：</strong></label>
-          <input id="parkingSlotNumber" v-model="selectedRequest.parkingSlotNumber" class="input-field" type="number" />
+          <input id="parkingSlotNumber" v-model="localRequest.parkingSlotNumber" class="input-field" type="number" />
         </div>
         <div class="modal-actions">
           <div class="empty"></div>
@@ -208,15 +208,19 @@ export default {
       try {
         let payload = {
           id: this.selectedRequest.requestId,
-          parkingSlotNumber: this.selectedRequest.parkingSlotNumber,
+          parkingSlotNumber: this.localRequest.parkingSlotNumber,
           status: this.localRequest.status
         }
 
         if(this.localRequest.status === 'REJECTED') {
-          this.selectedRequest.parkingSlotNumber = null;
+          payload = {
+            id: this.selectedRequest.requestId,
+            parkingSlotNumber: null,
+            status: this.localRequest.status
+          }
         }
 
-        if(this.localRequest.status === 'APPROVED' && this.selectedRequest.parkingSlotNumber === '') {
+        if(this.localRequest.status === 'APPROVED' && this.localRequest.parkingSlotNumber === '') {
           this.$emit('error', '請填入車位號碼')
           return;
         }
