@@ -206,6 +206,12 @@ export default {
     },
     async sendModel() {
       try {
+
+        if(this.localRequest.status === 'REVIEW') {
+          this.$emit('error', '請選擇審核結果')
+          return;
+        }
+
         let payload = {
           id: this.selectedRequest.requestId,
           parkingSlotNumber: this.localRequest.parkingSlotNumber,
@@ -220,7 +226,7 @@ export default {
           }
         }
 
-        if(this.localRequest.status === 'APPROVED' && this.localRequest.parkingSlotNumber === '') {
+        if(this.localRequest.status === 'APPROVED' && (this.localRequest.parkingSlotNumber === '' || this.localRequest.parkingSlotNumber === null)) {
           this.$emit('error', '請填入車位號碼')
           return;
         }
