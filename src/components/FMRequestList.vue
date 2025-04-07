@@ -368,7 +368,6 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
   background: #f8f9fa;
   padding: 8px;
   border-radius: 5px;
