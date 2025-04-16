@@ -12,7 +12,10 @@
           v-model="localTotalSlots"
           min="0"
           class="input-field"
-          :class="{ 'notFound-field': parkingData.totalSlotsId === null }"
+          :class="{ 
+              'notFound-field': parkingData.totalSlotsId === null,
+              'editing': isEditing === true 
+          }"
           :disabled="!isEditing"
         />
         <button
@@ -273,7 +276,7 @@ export default {
           
           let requestBody = {
             startDate: this.getWeekStartDate(this.currentWeekStart),
-            totalSlots: this.parkingData.totalSlots
+            totalSlots: this.localTotalSlots
           }
 
           let response = await parkFlowService.createParkingQuota(requestBody);
@@ -572,6 +575,14 @@ p {
 /* 未設定停車數量上限 */
 .notFound-field {
   border: 2px solid red;
+  color: rgb(255, 200, 200);
   background-color: rgb(255, 200, 200) !important;
+}
+
+/* 編輯停車數量上限 */
+.editing {
+  border: 1px solid gray;
+  color: black;
+  background-color: rgb(255, 255, 200) !important;
 }
 </style>
