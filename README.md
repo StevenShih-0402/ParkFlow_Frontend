@@ -1,85 +1,144 @@
->Backend：https://github.com/StevenShih-0402/ParkFlow_Backend
+# 🚗 商業大樓停車位預約系統
 
-- 開發緣由
+這是一個為辦公室員工設計的車位申請與管理系統，簡化申請流程、減少書面往來。
 
-  由於當時公司在大樓尚未有固定配額的停車位，因此員工如果要開車上班，就需要每週向大樓提交臨時車位申請。為了簡化預約流程，主管決定要開發一套供辦公室內部申請車位的系統，由主管提出需求，我和同事們協作開發此系統，讓辦公室同仁可以清楚確認每週申請狀況，減少寫信、寄信等書面往來的時間成本。
-  - 版控 & Code Review：Git/GitHub
-  - 專案管理：Trello
-  
-- 使用情境
+使用者可申請每週的臨時車位，管理員可進行審核並管理可供申請的車位數量。
 
-  系統會有申請停車位的一般使用者 (USER) 與審核申請的管理員 (FM)，USER 登入系統後，可以發送車位申請給 FM，FM 登入系統後就會去審核這些申請，回傳給 USER 他們這週的車位號碼，同時也要在系統設定每週能提供預約的車位數量。
-  ![image](https://github.com/user-attachments/assets/510d414c-057f-4196-8a6a-c150a72cc6b2)
+>🔗 搭配後端專案：[ParkFlow_Backend](https://github.com/StevenShih-0402/ParkFlow_Backend)
+>
+> 預設連線 API 位址為 `http://localhost:8080`
 
-- 功能介紹與圖示
-  
-  1. 登入、註冊畫面
-  
-      - 由於系統目的是給辦公室內部人員使用，因此登入僅驗證電子信箱。
-      - 註冊時會填入帳號預設的車牌號碼與車型，申請車位時可再修改。
-      - 登入的信箱若格式正確但沒有註冊過，會跳轉到註冊介面。
-      - 註冊完成後會自動登入系統。
-    
-        <details>
-        <summary>系統畫面</summary>
-          
-        ![image](https://github.com/user-attachments/assets/432ecd97-ab16-482b-a689-8fc32874eeee)
-          
-        ![image](https://github.com/user-attachments/assets/c4b7cf71-4b56-4a0d-93d7-93903ddda360)
-          
-        </details>
-  
-  2. 一般使用者(USER)
+---
 
-      - 查看每週的申請紀錄與剩餘車位。
-      - 用戶每週只能申請一次車位。
-      - 綠色圖示表示審核通過，黃色圖示表示正在審核，紅色圖示表示審核駁回。
-      - 若要申請下週的車位，必須要在當週的星期四前完成申請，為了給 FM 有足夠時間去和管委會溝通，但若有隔週的申請(如 FM 得知有三個星期的可申請車位數皆相同)，就不在此限。
+## 📌 專案緣由
 
-        <details>
-        <summary>主頁面</summary>
-        
-        ![image](https://github.com/user-attachments/assets/3459bc83-cbda-4427-90e2-d7826ba03dc7)
-      
-        ![image](https://github.com/user-attachments/assets/40d5e191-b110-40f7-af7e-35d86188610a)
-   
-        ![image](https://github.com/user-attachments/assets/a986d733-e8bf-48d1-ab6c-46cd27c3d56e)
-      
-        </details>
-      
-  3. 設備管理員(FM)
+由於當時公司大樓尚無固定配額車位，需每週申請臨時停車位，因此開發此系統簡化申請流程。由主管提出需求，我與同事協作開發此系統，以方便同仁申請與查詢審核狀況。
 
-      - 查看並審核所有用戶的車位申請。
-      - 查看並設定每週可供申請的車位。
-     
-        <details>
-        <summary>主頁面</summary>
-        
-        ![image](https://github.com/user-attachments/assets/724f778b-1cc0-4bd5-9371-eac6b698ffcd)
-      
-        ![image](https://github.com/user-attachments/assets/12bc1c25-5817-4589-8aaf-176ec0670995)
-      
-        ![image](https://github.com/user-attachments/assets/baa74270-5c8d-48d5-bef7-98c32c7ef43b)
-      
-        設定當週可預約的車位數量，但不能低於已預約的車位數量。
-        ![image](https://github.com/user-attachments/assets/35b8c87d-1ee8-4535-8bdf-de93c68aa716)
-      
-        駁回審核時，不會計算在預約車位。
-        ![image](https://github.com/user-attachments/assets/0e4d9275-b05e-4845-9d0d-d978942f04d5)
-      
-        </details>
-  
-  4. 用戶資訊頁面
-      <details>
-      <summary>顯示用戶資訊，用戶可以修改除了電子信箱以外的資訊(因為電子信箱在系統是登入用的資訊)。</summary>
-    
-      資料未修改前不能更新。
-      ![image](https://github.com/user-attachments/assets/62a6de20-75ed-4d87-8db0-31f359dacca6)
-    
-      與原資料不同才能更新。
-      ![image](https://github.com/user-attachments/assets/d36880a8-f957-4368-90f2-f676f325cc19)
-    
-      更新成功後的提示訊息。
-      ![image](https://github.com/user-attachments/assets/a83c00f8-e51f-4e0f-8544-ee99910fba5c)
-    
-      </details>
+---
+
+## 🔧 技術棧
+
+- **Frontend**： Vue 3 | Vite | Axios
+- **Backend**： Spring Boot | JWT | JPA (Hibernate) | Oracle
+- **其他**： GitHub (Code Review) | Trello (Project Management)
+
+---
+
+## 🚀 快速啟動
+
+```bash
+# 安裝依賴
+npm install
+
+# 啟動開發伺服器
+npm run dev
+```
+
+---
+
+## 📁 專案結構
+
+```bash
+.
+├── src/
+│   ├── components/        # Vue 元件
+│   ├── views/             # 頁面檔案
+│   ├── router/            # Vue Router 設定
+│   ├── services/          # API 請求封裝
+│   ├── App.vue            # 主組件
+│   ├── main.js            # 入口點
+│   └── vite.config.js     # API 連線設定
+```
+
+---
+
+## 👥 使用者角色
+
+| 角色 | 功能權限 |
+|------|----------|
+| 一般使用者 (USER) | - 提交每週車位申請<br>- 查詢申請狀態與剩餘名額 |
+| 管理員 (FM) | - 審核車位申請<br>- 設定每週可用車位數 |
+
+---
+
+## 📚 功能總覽
+
+- [x] 使用者登入 / 註冊（信箱驗證制）
+- [x] 車位申請流程（申請 ➜ 審核 ➜ 結果）
+- [x] 每週剩餘車位顯示
+- [x] 用戶只能每週申請一次
+- [x] 管理員可審核 / 駁回申請
+- [x] 管理員設定各週可供預約車位數
+- [x] 用戶個資編輯（車牌號碼 / 車型）
+
+---
+
+## 🖼️ 系統畫面預覽
+
+### 🔐 登入 / 註冊
+
+- 僅驗證信箱格式
+- 未註冊者導向註冊頁
+- 註冊後自動登入
+<details>
+<summary>點我展開畫面</summary>
+
+![登入頁](https://github.com/user-attachments/assets/432ecd97-ab16-482b-a689-8fc32874eeee)  
+![註冊頁](https://github.com/user-attachments/assets/c4b7cf71-4b56-4a0d-93d7-93903ddda360)
+
+</details>
+
+---
+
+### 👤 一般使用者 (USER)
+
+- 每週只能申請一次
+- 可查看剩餘名額與歷史紀錄
+- 車位審核狀態圖示：
+  - 🟢 綠色：審核通過
+  - 🟡 黃色：審核中
+  - 🔴 紅色：駁回
+- 申請需在週四前送出（可彈性由管理員調整）
+
+<details>
+<summary>點我展開畫面</summary>
+
+![使用者首頁](https://github.com/user-attachments/assets/3459bc83-cbda-4427-90e2-d7826ba03dc7)  
+![申請流程](https://github.com/user-attachments/assets/40d5e191-b110-40f7-af7e-35d86188610a)  
+![歷史申請](https://github.com/user-attachments/assets/a986d733-e8bf-48d1-ab6c-46cd27c3d56e)
+
+</details>
+
+---
+
+### 🛠️ 管理員 (FM)
+
+- 查看所有用戶申請紀錄
+- 核准 / 駁回申請
+- 設定各週可預約車位數（不得低於已申請數）
+
+<details>
+<summary>點我展開畫面</summary>
+
+![管理首頁](https://github.com/user-attachments/assets/724f778b-1cc0-4bd5-9371-eac6b698ffcd)  
+![申請審核](https://github.com/user-attachments/assets/12bc1c25-5817-4589-8aaf-176ec0670995)  
+![設定車位數](https://github.com/user-attachments/assets/35b8c87d-1ee8-4535-8bdf-de93c68aa716)  
+![駁回操作](https://github.com/user-attachments/assets/0e4d9275-b05e-4845-9d0d-d978942f04d5)
+
+</details>
+
+---
+
+### 🙍‍♂️ 用戶資訊頁面
+
+- 修改車牌號碼 / 車型（信箱不可更改）
+- 僅當資料變動才允許送出更新
+
+<details>
+<summary>點我展開畫面</summary>
+
+![個資未變更](https://github.com/user-attachments/assets/62a6de20-75ed-4d87-8db0-31f359dacca6)  
+![資料變更後](https://github.com/user-attachments/assets/d36880a8-f957-4368-90f2-f676f325cc19)  
+![更新成功提示](https://github.com/user-attachments/assets/a83c00f8-e51f-4e0f-8544-ee99910fba5c)
+
+</details>
