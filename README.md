@@ -36,38 +36,38 @@
       - 綠色圖示表示審核通過，黃色圖示表示正在審核，紅色圖示表示審核駁回。
       - 若要申請下週的車位，必須要在當週的星期四前完成申請，為了給 FM 有足夠時間去和管委會溝通，但若有隔週的申請(如 FM 得知有三個星期的可申請車位數皆相同)，就不在此限。
 
-      <details>
-      <summary>主頁面</summary>
+        <details>
+        <summary>主頁面</summary>
+        
+        ![image](https://github.com/user-attachments/assets/3459bc83-cbda-4427-90e2-d7826ba03dc7)
       
-      ![image](https://github.com/user-attachments/assets/3459bc83-cbda-4427-90e2-d7826ba03dc7)
-    
-      ![image](https://github.com/user-attachments/assets/40d5e191-b110-40f7-af7e-35d86188610a)
- 
-      ![image](https://github.com/user-attachments/assets/a986d733-e8bf-48d1-ab6c-46cd27c3d56e)
-    
-      </details>
+        ![image](https://github.com/user-attachments/assets/40d5e191-b110-40f7-af7e-35d86188610a)
+   
+        ![image](https://github.com/user-attachments/assets/a986d733-e8bf-48d1-ab6c-46cd27c3d56e)
+      
+        </details>
       
   3. 設備管理員(FM)
 
       - 查看並審核所有用戶的車位申請。
       - 查看並設定每週可供申請的車位。
      
-      <details>
-      <summary>主頁面</summary>
+        <details>
+        <summary>主頁面</summary>
+        
+        ![image](https://github.com/user-attachments/assets/724f778b-1cc0-4bd5-9371-eac6b698ffcd)
       
-      ![image](https://github.com/user-attachments/assets/724f778b-1cc0-4bd5-9371-eac6b698ffcd)
-    
-      ![image](https://github.com/user-attachments/assets/12bc1c25-5817-4589-8aaf-176ec0670995)
-    
-      ![image](https://github.com/user-attachments/assets/baa74270-5c8d-48d5-bef7-98c32c7ef43b)
-    
-      設定當週可預約的車位數量，但不能低於已預約的車位數量。
-      ![image](https://github.com/user-attachments/assets/35b8c87d-1ee8-4535-8bdf-de93c68aa716)
-    
-      駁回審核時，不會計算在預約車位。
-      ![image](https://github.com/user-attachments/assets/0e4d9275-b05e-4845-9d0d-d978942f04d5)
-    
-      </details>
+        ![image](https://github.com/user-attachments/assets/12bc1c25-5817-4589-8aaf-176ec0670995)
+      
+        ![image](https://github.com/user-attachments/assets/baa74270-5c8d-48d5-bef7-98c32c7ef43b)
+      
+        設定當週可預約的車位數量，但不能低於已預約的車位數量。
+        ![image](https://github.com/user-attachments/assets/35b8c87d-1ee8-4535-8bdf-de93c68aa716)
+      
+        駁回審核時，不會計算在預約車位。
+        ![image](https://github.com/user-attachments/assets/0e4d9275-b05e-4845-9d0d-d978942f04d5)
+      
+        </details>
   
   4. 用戶資訊頁面
       <details>
